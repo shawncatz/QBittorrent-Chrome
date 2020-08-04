@@ -18,7 +18,7 @@ function login(){
     /* Gets auth cookie from Qbittorrent WebUI
     */
     chrome.storage.local.get(["address", "username", "password"], function(config){
-        $.post(config.address + "/login", {
+        $.post(config.address + "/api/v2/auth/login", {
             "username": encodeURIComponent(config.username),
             "password": encodeURIComponent(config.password)
         })
@@ -78,7 +78,7 @@ function get_torrent_info(){
 
     chrome.storage.local.get(["address", "display_notifications"], function(config){
         console.log(config.display_notifications)
-        $.get(config.address + "/query/torrents?sort=priority")
+        $.get(config.address + "/api/v2/torrents/info?sort=priority")
         .done(function(response){
 
             if(config.display_notifications && background.last_response !== null){
@@ -212,7 +212,25 @@ function api_command(path, params){
     */
 
     chrome.storage.local.get("address", function(config){
-        $.post(config.address + path, params)
+        $.get(config.address + "/api/v2" + path, params)
+        .always(function(response){
+            update();
+        })
+    })
+}
+
+function api_command_post(path, params){
+    /* Sends api request to QBit
+    path (str): sub-path to api call (ie "/command/resume")
+    params (obj): params to send in POST    <optional>
+
+    Sends api command and updates interface.
+
+    Returns str response from
+    */
+
+    chrome.storage.local.get("address", function(config){
+        $.post(config.address + "/api/v2" + path, params)
         .always(function(response){
             update();
         })

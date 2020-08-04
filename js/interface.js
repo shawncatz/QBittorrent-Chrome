@@ -1,6 +1,6 @@
 var body;
 
-$(document).ready(function(){
+$(document).ready(function () {
     body = $("body");
     update_interface();
 });
@@ -20,9 +20,9 @@ var toolbar = `
     </div>
 </div>`;
 
-function update_interface(){
-    chrome.storage.local.get(["torrent_html", "stats", "logged_in", "address"], function(config){
-        if(!config.logged_in){
+function update_interface() {
+    chrome.storage.local.get(["torrent_html", "stats", "logged_in", "address"], function (config) {
+        if (!config.logged_in) {
             var error_html = `
             <div id="error">
                 <h3>Unable to connect to QBittorrent</h3>
@@ -58,27 +58,27 @@ function update_interface(){
 };
 
 /* Update interface when storage.local.torrent_html updates */
-chrome.storage.onChanged.addListener(function(changes, namespace){
-    if(changes.torrent_html){
+chrome.storage.onChanged.addListener(function (changes, namespace) {
+    if (changes.torrent_html) {
         update_interface();
     }
 }, false);
 
-document.addEventListener("click", function(e){
-    if(!e.target){
+document.addEventListener("click", function (e) {
+    if (!e.target) {
         return
-    } else if(e.target.dataset.action == "remove"){
+    } else if (e.target.dataset.action == "remove") {
         remove_torrent(e.target);
-    } else if(e.target.dataset.action == "toggle_status"){
+    } else if (e.target.dataset.action == "toggle_status") {
         toggle_status(e.target);
-    } else if(e.target.dataset.action == "pause_all"){
+    } else if (e.target.dataset.action == "pause_all") {
         pause_all(e.target);
-    } else if(e.target.dataset.action == "resume_all"){
+    } else if (e.target.dataset.action == "resume_all") {
         resume_all(e.target);
     }
 });
 
-function toggle_status(elem){
+function toggle_status(elem) {
     /* Changes torrent status between paused/active
     elem (obj): button element
     */
@@ -86,28 +86,28 @@ function toggle_status(elem){
 
     var hash = torrent.dataset.hash;
 
-    if(torrent.dataset.paused == "true"){
-        api_command("/command/resume", {"hash": hash});
+    if (torrent.dataset.paused == "true") {
+        api_command("/torrents/resume", {"hashes": hash});
     } else {
-        api_command("/command/pause", {"hash": hash});
+        api_command("/torrents/pause", {"hashes": hash});
     }
 }
 
 
-function remove_torrent(elem){
+function remove_torrent(elem) {
     /* Removes torrent from QBit
     elem (obj): button element
 
     */
     var hash = elem.closest('.torrent').dataset.hash;
 
-    api_command("/command/deletePerm", {"hashes": hash});
+    api_command("/torrents/delete", {"hashes": hash, "deleteFiles": true});
 }
 
-function pause_all(elem){
-    api_command("/command/pauseAll");
+function pause_all(elem) {
+    api_command("/torrents/pause", {"hashes": "all"});
 }
 
-function resume_all(elem){
-    api_command("/command/resumeAll");
+function resume_all(elem) {
+    api_command("/torrents/resume", {"hashes": "all"});
 }

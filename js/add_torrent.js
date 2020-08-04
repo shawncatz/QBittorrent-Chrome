@@ -42,6 +42,6 @@ function send(){
         });
     };
 
-    api_command("/command/download", params);
+    api_command_post("/torrents/add", params);
     window.close();
 }
